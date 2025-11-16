@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Token Monitor</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        #tokens {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .token {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+            .token.updated {
+                background-color: #fffbe6;
+                transition: background-color 0.5s;
+            }
+
+            .token h3 {
+                margin: 0 0 5px 0;
+            }
+
+            .token p {
+                margin: 4px 0;
+                font-size: 14px;
+            }
+
+            .token .price {
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <h1>Real-time Token Updates</h1>
+    <div id="status">Connecting...</div>
+    <div id="tokens"></div>
+
+    <script>
+        // Update with your deployed server URL
+        const SERVER_URL = 'http://localhost:3000';
+        const socket = io(SERVER_URL);
+
+        const tokenMap = new Map();
+        const tokensContainer = document.getElementById('tokens');
+
+        const renderToken = (token) => {
+            return `
+                <h3>${token.token_ticker} (${token.token_name})</h3>
+                <p class="price">Price (SOL): ${token.price_sol}</p>
+                <p>Volume (24h): ${token.volume_sol}</p>
+                <p>Change (1h): ${token.price_1hr_change}%</p>
+                <p><small>${token.token_address}</small></p>
+            `;
+        };
+
+        socket.on('connect', () => {
+            document.getElementById('status').innerText = 'Connected!';
+        });
+
+        // 1. Handle the initial full list
+        socket.on('initialTokenList', (tokens) => {
+            console.log('Received initial list', tokens);
+            tokensContainer.innerHTML = ''; // Clear
+            for (const token of tokens) {
+                tokenMap.set(token.token_address, token);
+                const tokenEl = document.createElement('div');
+                tokenEl.className = 'token';
+                tokenEl.id = token.token_address;
+                tokenEl.innerHTML = renderToken(token);
+                tokensContainer.appendChild(tokenEl);
+            }
+        });
+
+        // 2. Handle partial updates
+        socket.on('tokenUpdates', (updates) => {
+            console.log('Received updates', updates);
+            document.getElementById('status').innerText = `Last update: ${new Date().toLocaleTimeString()}`;
+
+            for (const update of updates) {
+                const existingToken = tokenMap.get(update.token_address);
+                if (existingToken) {
+                    // Merge update
+                    const updatedToken = { ...existingToken, ...update };
+                    tokenMap.set(update.token_address, updatedToken);
+
+                    // Update DOM
+                    const tokenEl = document.getElementById(update.token_address);
+                    if (tokenEl) {
+                        tokenEl.innerHTML = renderToken(updatedToken);
+                        // Highlight the change
+                        tokenEl.classList.add('updated');
+                        setTimeout(() => tokenEl.classList.remove('updated'), 500);
+                    }
+                }
+            }
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('status').innerText = 'Disconnected.';
+        });
+    </script>
+</body>
+</html>
