@@ -48,7 +48,7 @@
 
     <script>
         // Update with your deployed server URL
-        const SERVER_URL = 'http://localhost:3000';
+        const SERVER_URL = 'https://real-time-aggregator.onrender.com';
         const socket = io(SERVER_URL);
 
         const tokenMap = new Map();
@@ -56,12 +56,12 @@
 
         const renderToken = (token) => {
             return `
-                <h3>${token.token_ticker} (${token.token_name})</h3>
-                <p class="price">Price (SOL): ${token.price_sol}</p>
-                <p>Volume (24h): ${token.volume_sol}</p>
-                <p>Change (1h): ${token.price_1hr_change}%</p>
-                <p><small>${token.token_address}</small></p>
-            `;
+                    <h3>${token.token_ticker} (${token.token_name})</h3>
+                    <p class="price">Price (SOL): ${token.price_sol}</p>
+                    <p>Volume (24h): ${token.volume_sol}</p>
+                    <p>Change (1h): ${token.price_1hr_change}%</p>
+                    <p><small>${token.token_address}</small></p>
+                `;
         };
 
         socket.on('connect', () => {
