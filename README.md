@@ -10,7 +10,7 @@ The project fulfills a technical task to build a service that intelligently fetc
 
 **Live API Endpoint:** [`https://real-time-aggregator.onrender.com/tokens`](https://real-time-aggregator.onrender.com/tokens)
 
-**Demo Video:** `[[Link to your 1-2 minute YouTube/Loom video]](https://www.youtube.com/watch?v=k8xf9nJj0L0)`
+**Demo Video:** `https://www.youtube.com/watch?v=k8xf9nJj0L0`
 
 ### ✨ Core Features
 
